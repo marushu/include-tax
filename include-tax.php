@@ -16,9 +16,9 @@ function custom_search_where( $where ){
 	$customs = array('custom_field1', 'custom_field2', 'custom_field3');
 
 	if ( is_search() && get_search_query() ) {
-		$where .= "OR ((t.name LIKE '%" . get_search_query() . "%' OR t.slug LIKE '%" . get_search_query() . "%') AND {$wpdb->posts}.post_status = 'publish')";
+		$where .= "OR ((t.name LIKE '%" . get_search_query() . "%' OR t.slug LIKE '%" . get_search_query() . "%') AND {$wpdb->posts}.post_status = 'publish') OR (({$wpdb->postmeta}.meta_key = 'textfield_common') AND ({$wpdb->postmeta}.meta_value  LIKE '%" . get_search_query() . "%')) OR (({$wpdb->postmeta}.meta_key = 'textfield_common') AND ({$wpdb->postmeta}.meta_value  LIKE '%" . get_search_query() . "%'))";
 
-		$where .= " OR (({$wpdb->postmeta}.meta_key = 'textfield_common') AND ({$wpdb->postmeta}.meta_value  LIKE '%" . get_search_query() . "%'))";
+		//$where .= " OR (({$wpdb->postmeta}.meta_key = 'textfield_common') AND ({$wpdb->postmeta}.meta_value  LIKE '%" . get_search_query() . "%'))";
 	}
 
 	return $where;
@@ -27,9 +27,11 @@ function custom_search_where( $where ){
 function custom_search_join( $join ){
 	global $wpdb;
 	if ( is_search() && get_search_query() ) {
-		$join .= "LEFT JOIN {$wpdb->term_relationships} tr ON {$wpdb->posts}.ID = tr.object_id INNER JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id=tr.term_taxonomy_id INNER JOIN {$wpdb->terms} t ON t.term_id = tt.term_id";
+		$join .= "
+		INNER JOIN {$wpdb->postmeta} ON {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id
+		 LEFT JOIN {$wpdb->term_relationships} tr ON {$wpdb->posts}.ID = tr.object_id INNER JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id=tr.term_taxonomy_id INNER JOIN {$wpdb->terms} t ON t.term_id = tt.term_id";
 
-		$join .= " LEFT JOIN {$wpdb->postmeta} ON {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id ";
+		//$join .= " LEFT JOIN {$wpdb->postmeta} ON {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id ";
 	}
 
 	return $join;
